@@ -1,0 +1,185 @@
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Log Query Interface</title>
+  <style>
+    /* Your CSS styles here... */
+    /* Styling for body, h1, form, labels, inputs, etc. */
+
+    /* Example styling for animation */
+    /* You can modify this to suit your preferences */
+    @keyframes scaleAnimation {
+      from { transform: scale(1); }
+      to { transform: scale(1.02); }
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      animation: scaleAnimation 0.3s ease-in-out;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 15px;
+      color: #666;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="submit"] {
+      width: calc(100% - 12px);
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: border-color 0.3s ease-in-out;
+    }
+
+    input[type="text"]:focus,
+    input[type="submit"]:hover {
+      border-color: #3498db;
+    }
+
+    input[type="submit"] {
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #2980b9;
+    }
+
+    #queryResults {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Log Query Interface</h1>
+  
+  <form id="queryForm" onsubmit="fetchLogs(); return false;">
+    <label for="level">Level:</label>
+    <input type="text" id="level" name="level" placeholder="Enter log level">
+
+    <label for="message">Message:</label>
+    <input type="text" id="message" name="message" placeholder="Enter log message">
+
+    <label for="resourceId">Resource ID:</label>
+    <input type="text" id="resourceId" name="resourceId" placeholder="Enter resource ID">
+
+    <label for="timestamp">Timestamp:</label>
+    <input type="text" id="timestamp" name="timestamp" placeholder="YYYY-MM-DD HH:MM:SS">
+
+    <label for="traceId">Trace ID:</label>
+    <input type="text" id="traceId" name="traceId" placeholder="Enter trace ID">
+
+    <label for="spanId">Span ID:</label>
+    <input type="text" id="spanId" name="spanId" placeholder="Enter span ID">
+
+    <label for="commit">Commit:</label>
+    <input type="text" id="commit" name="commit" placeholder="Enter commit hash">
+
+    <label for="parentResourceId">Parent Resource ID:</label>
+    <input type="text" id="parentResourceId" name="parentResourceId" placeholder="Enter parent resource ID">
+
+    <!-- Add other fields based on your log schema -->
+
+    <input type="submit" value="Search">
+  </form>
+
+  <div id="queryResults"></div>
+  <div id="logs"></div>
+
+  <script>
+    function fetchLogs() {
+      const levelFilter = document.getElementById('level').value;
+      const messageFilter = document.getElementById('message').value;
+      const resourceIdFilter = document.getElementById('resourceId').value;
+      const timestampStartFilter = document.getElementById('timestamp').value; // Assuming an input field with id="timestamp"
+      const timestampEndFilter = document.getElementById('timestampEnd').value; // Assuming an input field with id="timestampEnd"
+      const traceIdFilter = document.getElementById('traceId').value;
+      const spanIdFilter = document.getElementById('spanId').value;
+      const commitFilter = document.getElementById('commit').value;
+      const parentResourceIdFilter = document.getElementById('parentResourceId').value;
+      const queryParams = new URLSearchParams();
+
+      if (levelFilter) queryParams.append('level', levelFilter);
+      if (messageFilter) queryParams.append('message', messageFilter);
+      if (resourceIdFilter) queryParams.append('resourceId', resourceIdFilter);
+      if (timestampStartFilter) queryParams.append('timestampStart', timestampStartFilter);
+      if (timestampEndFilter) queryParams.append('timestampEnd', timestampEndFilter);
+      if (traceIdFilter) queryParams.append('traceId', traceIdFilter);
+      if (spanIdFilter) queryParams.append('spanId', spanIdFilter);
+      if (commitFilter) queryParams.append('commit', commitFilter);
+      if (parentResourceIdFilter) queryParams.append('metadata.parentResourceId', parentResourceIdFilter);
+
+      const queryUrl = `http://localhost:3000/logs?${queryParams}`;
+
+      fetch(queryUrl)
+        .then(response => response.json())
+        .then(data => {
+          displayLogs(data);
+        })
+        .catch(error => {
+          console.error('Error fetching logs:', error);
+        });
+    }
+
+    function displayLogs(logs) {
+      const logsContainer = document.getElementById('logs');
+      logsContainer.innerHTML = '';
+
+      if (logs.length === 0) {
+        logsContainer.innerHTML = '<p>No logs found.</p>';
+        return;
+      }
+
+      logs.forEach((log, index) => {
+        setTimeout(() => {
+          const logElement = createLogElement(log);
+          logsContainer.appendChild(logElement);
+        }, index * 100); // Add delay for basic animation
+      });
+    }
+
+    function createLogElement(log) {
+      const logItem = document.createElement('div');
+      logItem.classList.add('log-item');
+      logItem.innerHTML = `
+        <p><strong>Level:</strong> ${log.level}</p>
+        <p><strong>Message:</strong> ${log.message}</p>
+        <p><strong>Resource ID:</strong> ${log.resourceId}</p>
+        <!-- Add other log details as needed -->
+      `;
+      return logItem;
+    }
+    // Your JavaScript code here...
+  </script>
+</body>
+</html>
+
